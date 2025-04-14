@@ -8,14 +8,14 @@ from pathlib import Path
 # Adjust these paths as needed
 NAS_MOUNT = "/mnt/nas"
 LOG_DIR = tempfile.mkdtem(prefix='.tmp-')
-CONTAINER_IMAGE = "media_detonator"
+CONTAINER_IMAGE = "file_checker"
 
 # Ensure log directory exists
 os.makedirs(LOG_DIR, exist_ok=True)
 
 
 def detonate_file(file_path):
-    print(f"[+] Detonating {file_to_scan}")
+    print(f"[+] Checking {file_to_scan}")
 
     command = [
         "docker", "run", "--rm",
@@ -25,17 +25,21 @@ def detonate_file(file_path):
         CONTAINER_IMAGE,
         "-c",
         f'''
+        # TCPDUMP
         timeout 60 tcpdump -w /tmp/network.pcap &
         TCPDUMP_PID=$!
 
+        # STRACE
         timeout 60 strace -ff -e trace=execve,connect,socket,open \
         ffprobe "{file_path}" &> /tmp/strace.log
 
         kill $TCPDUMP_PID
 
+        # CHECK STRACE OUTPUT
         grep -Ei 'execve|socket|connect' /tmp/strace.log && \
             echo "[ANOMALY] {file_to_test} subprocess/network activity" >> /logs/anomalies.log
 
+        # STRINGS CHECK
         if strings "{file_to_test}" | grep -Eiq '(powershell|http://|https://|c2|base64|cmd.exe)'; then
             echo "[ANOMALY] {file_to_test} suspicious strings detected." >> /logs/anomalies.log
         fi

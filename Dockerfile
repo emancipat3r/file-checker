@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     strace \
     lsof \
     tcpdump \
-    grep \
-    && rm -rf /var/lib/apt/lists/*
+    grep
 
 ENTRYPOINT ["/bin/bash"]
