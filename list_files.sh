@@ -1,7 +1,12 @@
 #!/bin/bash
 
-read -rp "[+] Enter the path to the directory: " input_path
-read -rp "[+] Enter the name of the output file: " output_file
+if ! command -v gum &>/dev/null; then
+  echo "[!] Gum is not installed. Aborting."
+  exit 1
+fi
+
+input_path=$(gum input --placeholder='path' --prompt='[+] Enter the path to the directory: ' --prompt.foreground "#0FF" --cursor.foreground "#FF0")
+output_file=$(gum input --placeholder='path' --prompt='[+] Enter the name of the output file: ' --prompt.foreground "#0FF" --cursor.foreground "#FF0")
 
 # Resolve the absolute path of the directory
 abs_path=$(realpath "$input_path")
