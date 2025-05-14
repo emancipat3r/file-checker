@@ -25,15 +25,9 @@ def detonate_file(file_path):
         CONTAINER_IMAGE,
         "-c",
         f'''
-        # TCPDUMP
-        timeout 60 tcpdump -w /tmp/network.pcap &
-        TCPDUMP_PID=$!
-
         # STRACE
         timeout 60 strace -ff -e trace=execve,connect,socket,open \
         ffprobe "{file_path}" &> /tmp/strace.log
-
-        kill $TCPDUMP_PID
 
         # CHECK STRACE OUTPUT
         grep -Ei 'execve|socket|connect' /tmp/strace.log && \
