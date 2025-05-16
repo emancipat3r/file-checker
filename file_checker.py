@@ -23,10 +23,17 @@ def detonate_file(file_rel_path: str):
     ffmpeg -v error -nostats -hide_banner -i "{full_path}" -f null - \
     &> "/logs/{filename}_strace.log"
 
-    # Filter out expected ffmpeg execve call
-    grep -Ei 'execve|socket|connect' "/logs/{filename}_strace.log" \\
+    # Old grep line would match on filenames if it contained a grep string 
+    # grep -Ei 'execve|socket|connect' "/logs/{filename}_strace.log" \\
+    # | grep -vE '^execve\(".*ffmpeg"' \\
+    # > "/logs/{filename}_summary.log" || true
+
+    # Only include anomolous syscalls (see above)
+    grep -E '^\w+\(' "/logs/{filename}_strace.log" \\
+    | grep -E '^(execve|socket|connect)\(' \\
     | grep -vE '^execve\(".*ffmpeg"' \\
     > "/logs/{filename}_summary.log" || true
+
 
     if [[ -s "/logs/{filename}_summary.log" ]]; then
       echo "[ANOMALY] {filename} triggered subprocess or network activity!" >> /logs/anomalies.log
