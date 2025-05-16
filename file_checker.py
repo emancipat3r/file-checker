@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 
 # === Config ===
-NAS_MOUNT = "/mnt/nas_media"  # Change if needed
+NAS_MOUNT = "/mnt/share"  # Change if needed
 CONTAINER_IMAGE = "file_checker"
 LOG_DIR = tempfile.mkdtemp(prefix=".file_checker-")
 
